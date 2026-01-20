@@ -1,0 +1,71 @@
+
+-- =========================
+-- ENUM TYPES
+-- =========================
+CREATE TYPE user_role AS ENUM ('lecturer', 'staff');
+CREATE TYPE item_category AS ENUM ('OP Stock', 'OP Non-Stock');
+CREATE TYPE order_type AS ENUM ('retrieval', 'order');
+CREATE TYPE order_status AS ENUM ('pending', 'approved', 'completed');
+
+-- =========================
+-- USERS
+-- =========================
+CREATE TABLE users (
+  email TEXT PRIMARY KEY,
+  role user_role NOT NULL
+);
+
+-- =========================
+-- STATIONERY ITEMS
+-- =========================
+CREATE TABLE stationery_items (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category item_category NOT NULL,
+  total_stock INT NOT NULL CHECK (total_stock >= 0),
+  available_stock INT NOT NULL CHECK (available_stock >= 0),
+  unit TEXT NOT NULL
+);
+
+-- =========================
+-- RETRIEVAL & ORDER
+-- =========================
+CREATE TABLE retrieval_orders (
+  id TEXT PRIMARY KEY,
+  type order_type NOT NULL,
+  user_email TEXT NOT NULL,
+  item_id TEXT NOT NULL,
+  item_name TEXT NOT NULL,
+  quantity INT NOT NULL CHECK (quantity > 0),
+  notes TEXT,
+  date TIMESTAMPTZ NOT NULL DEFAULT now(),
+  status order_status NOT NULL DEFAULT 'pending',
+
+  CONSTRAINT fk_user
+    FOREIGN KEY (user_email)
+    REFERENCES users(email)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_item
+    FOREIGN KEY (item_id)
+    REFERENCES stationery_items(id)
+    ON DELETE RESTRICT
+);
+
+-- =========================
+-- MISSING REPORTS
+-- =========================
+CREATE TABLE missing_reports (
+  id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  item_name TEXT NOT NULL,
+  reported_by TEXT NOT NULL,
+  quantity INT NOT NULL CHECK (quantity > 0),
+  notes TEXT,
+  date TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  CONSTRAINT fk_missing_item
+    FOREIGN KEY (item_id)
+    REFERENCES stationery_items(id)
+    ON DELETE RESTRICT
+);

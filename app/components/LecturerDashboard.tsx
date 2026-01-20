@@ -29,6 +29,9 @@ interface LecturerDashboardProps {
   onAddRetrievalOrder: (
     order: Omit<RetrievalOrder, "id" | "date" | "status">,
   ) => void;
+  onAddStationeryItem: (
+    item: Omit<StationeryItem, "id">
+  ) => Promise<void>;
 }
 
 export default function LecturerDashboard({

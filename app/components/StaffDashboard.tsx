@@ -26,6 +26,7 @@ import StockReport from "@/app/components/StockReport";
 import InventoryManagement from "@/app/components/InventoryManagement";
 import MissingReportForm from "@/app/components/MissingReportForm";
 import HistoryList from "@/app/components/HistoryList";
+import AddStationeryForm from "./AddStationeryForm";
 import type {
   User,
   StationeryItem,
@@ -39,9 +40,15 @@ interface StaffDashboardProps {
   stationeryItems: StationeryItem[];
   retrievalsOrders: RetrievalOrder[];
   missingReports: MissingReport[];
-  onAddMissingReport: (report: Omit<MissingReport, "id" | "date">) => void;
-  onUpdateStock: (itemId: string, newStock: number) => void;
+  onAddMissingReport: (
+    report: Omit<MissingReport, "id" | "date">
+  ) => Promise<void>;
+  onUpdateStock: (itemId: string, newStock: number) => Promise<void>;
+  onAddStationeryItem: (
+    item: Omit<StationeryItem, "id">
+  ) => Promise<void>;
 }
+
 
 export default function StaffDashboard({
   user,
@@ -51,6 +58,7 @@ export default function StaffDashboard({
   missingReports,
   onAddMissingReport,
   onUpdateStock,
+  onAddStationeryItem,
 }: StaffDashboardProps) {
   const [activeTab, setActiveTab] = useState("report");
 
@@ -221,6 +229,7 @@ export default function StaffDashboard({
           <TabsContent value="inventory" className="space-y-6">
             <Card className="border-gray-200 shadow-md">
               <CardHeader className="bg-gradient-to-r from-orange-50 to-white border-b border-gray-100">
+                
                 <CardTitle className="text-orange-900">
                   Inventory Management
                 </CardTitle>
@@ -229,6 +238,7 @@ export default function StaffDashboard({
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
+                <AddStationeryForm onAddItem={onAddStationeryItem} />
                 <InventoryManagement
                   stationeryItems={stationeryItems}
                   onUpdateStock={onUpdateStock}

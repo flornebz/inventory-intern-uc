@@ -20,9 +20,14 @@ import type { StationeryItem, MissingReport } from "../page";
 interface MissingReportFormProps {
   stationeryItems: StationeryItem[];
   reportedBy: string;
-  onSubmit: (report: Omit<MissingReport, "id" | "date">) => void;
+
+  onSubmit: (
+    report: Omit<MissingReport, "id" | "date">
+  ) => Promise<void>;
+
   missingReports: MissingReport[];
 }
+
 
 export default function MissingReportForm({
   stationeryItems,
@@ -38,31 +43,32 @@ export default function MissingReportForm({
     (item) => item.id === selectedItemId,
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!selectedItemId) {
-      toast.error("Item Required", {
-        description: "Please select a stationery item",
-      });
-      return;
-    }
+  if (!selectedItemId) {
+    toast.error("Item Required", {
+      description: "Please select a stationery item",
+    });
+    return;
+  }
 
-    if (!quantity || parseFloat(quantity) <= 0) {
-      toast.error("Quantity Required", {
-        description: "Please enter a valid quantity",
-      });
-      return;
-    }
+  if (!quantity || parseFloat(quantity) <= 0) {
+    toast.error("Quantity Required", {
+      description: "Please enter a valid quantity",
+    });
+    return;
+  }
 
-    if (!notes.trim()) {
-      toast.error("Notes Required", {
-        description: "Please provide notes about the missing item",
-      });
-      return;
-    }
+  if (!notes.trim()) {
+    toast.error("Notes Required", {
+      description: "Please provide notes about the missing item",
+    });
+    return;
+  }
 
-    onSubmit({
+  try {
+    await onSubmit({
       itemId: selectedItemId,
       itemName: selectedItem?.name || "",
       reportedBy,
@@ -78,7 +84,13 @@ export default function MissingReportForm({
     setSelectedItemId("");
     setQuantity("");
     setNotes("");
-  };
+  } catch (err: any) {
+    toast.error("Failed to submit report", {
+      description: err?.message ?? "Unknown error occurred",
+    });
+  }
+};
+
 
   return (
     <div className="space-y-6">
