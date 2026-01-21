@@ -214,68 +214,163 @@ export default function StockReport({
           <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b-2 border-orange-500 pb-2">
             Detailed Inventory
           </h3>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-orange-50">
-                  <TableHead className="font-semibold text-black">Item Name</TableHead>
-                  <TableHead className="font-semibold text-black">Category</TableHead>
-                  <TableHead className="font-semibold text-black text-right">
-                    Total Stock
-                  </TableHead>
-                  <TableHead className="font-semibold text-black text-right">
-                    Available
-                  </TableHead>
-                  <TableHead className="font-semibold text-black">Unit</TableHead>
-                  <TableHead className="font-semibold text-black text-right">
-                    % Available
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stationeryItems.map((item) => {
-                  const percentAvailable =
-                    (item.availableStock / item.totalStock) * 100;
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            item.category === "OP Stock"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
-                        >
-                          {item.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {item.totalStock}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {item.availableStock}
-                      </TableCell>
-                      <TableCell>{item.unit}</TableCell>
-                      <TableCell className="text-right">
-                        <span
-                          className={`font-medium ${
-                            percentAvailable < 20
-                              ? "text-red-600"
-                              : percentAvailable < 50
-                                ? "text-orange-600"
-                                : "text-green-600"
-                          }`}
-                        >
-                          {percentAvailable.toFixed(1)}%
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+        {/* OP STOCK */}
+<div className="mb-10">
+  <h4 className="font-semibold text-blue-800 mb-3">OP Stock</h4>
+
+  <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <Table>
+      <TableHeader>
+        <TableRow className="bg-orange-50">
+          <TableHead>Item Name</TableHead>
+          <TableHead>Category</TableHead>
+          <TableHead className="text-right">Unit Price</TableHead>
+          <TableHead className="text-right">Total Stock</TableHead>
+          <TableHead className="text-right">Available</TableHead>
+          <TableHead>Unit</TableHead>
+          <TableHead className="text-right">% Available</TableHead>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {opStockItems.map((item) => {
+          const percentAvailable =
+            (item.availableStock / item.totalStock) * 100;
+
+          return (
+            <TableRow key={item.id}>
+              <TableCell className="font-medium">{item.name}</TableCell>
+
+              <TableCell>
+                <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
+                  OP Stock
+                </span>
+              </TableCell>
+
+
+              <TableCell className="text-right">
+                {item.unitPrice
+                  ? item.unitPrice.toLocaleString("id-ID")
+                  : "-"}
+              </TableCell>
+
+              <TableCell className="text-right">{item.totalStock}</TableCell>
+
+              <TableCell className="text-right font-semibold">
+                {item.availableStock}
+              </TableCell>
+
+              <TableCell>{item.unit}</TableCell>
+
+              <TableCell className="text-right">
+                <span
+                  className={`font-medium ${
+                    percentAvailable < 20
+                      ? "text-red-600"
+                      : percentAvailable < 50
+                        ? "text-orange-600"
+                        : "text-green-600"
+                  }`}
+                >
+                  {percentAvailable.toFixed(1)}%
+                </span>
+              </TableCell>
+            </TableRow>
+          );
+        })}
+
+        {opStockItems.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={8} className="text-center text-gray-500">
+              Tidak ada data OP Stock
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </div>
+</div>
+
+        {/* OP NON-STOCK */}
+        {/* OP NON-STOCK */}
+<div>
+  <h4 className="font-semibold text-purple-800 mb-3">OP Non-Stock</h4>
+
+  <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <Table>
+      <TableHeader>
+        <TableRow className="bg-orange-50">
+          <TableHead>Item Name</TableHead>
+          <TableHead>Category</TableHead>
+          <TableHead>Merek</TableHead>
+          <TableHead className="text-right">Unit Price</TableHead>
+          <TableHead className="text-right">Total Stock</TableHead>
+          <TableHead className="text-right">Available</TableHead>
+          <TableHead>Unit</TableHead>
+          <TableHead className="text-right">% Available</TableHead>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {opNonStockItems.map((item) => {
+          const percentAvailable =
+            (item.availableStock / item.totalStock) * 100;
+
+          return (
+            <TableRow key={item.id}>
+              <TableCell className="font-medium">{item.name}</TableCell>
+
+              <TableCell>
+                <span className="px-2 py-1 rounded text-xs bg-purple-100 text-purple-800">
+                  OP Non-Stock
+                </span>
+              </TableCell>
+
+              <TableCell>{item.brand ?? "-"}</TableCell>
+
+              <TableCell className="text-right">
+                {item.unitPrice
+                  ? item.unitPrice.toLocaleString("id-ID")
+                  : "-"}
+              </TableCell>
+
+              <TableCell className="text-right">{item.totalStock}</TableCell>
+
+              <TableCell className="text-right font-semibold">
+                {item.availableStock}
+              </TableCell>
+
+              <TableCell>{item.unit}</TableCell>
+
+              <TableCell className="text-right">
+                <span
+                  className={`font-medium ${
+                    percentAvailable < 20
+                      ? "text-red-600"
+                      : percentAvailable < 50
+                        ? "text-orange-600"
+                        : "text-green-600"
+                  }`}
+                >
+                  {percentAvailable.toFixed(1)}%
+                </span>
+              </TableCell>
+            </TableRow>
+          );
+        })}
+
+        {opNonStockItems.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={8} className="text-center text-gray-500">
+              Tidak ada data OP Non-Stock
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </div>
+</div>
+
         </div>
 
         {/* Category Summary */}

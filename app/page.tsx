@@ -20,9 +20,15 @@ export interface StationeryItem {
   id: string;
   name: string;
   category: 'OP Stock' | 'OP Non-Stock';
+
+  /** STOCK */
   totalStock: number;
   availableStock: number;
   unit: string;
+
+  /** OPTIONAL (NON OP-STOCK) */
+  brand?: string | null;
+  unitPrice?: number | null;
 }
 
 export interface RetrievalOrder {
@@ -58,62 +64,72 @@ export default function App() {
   const [missingReports, setMissingReports] = useState<MissingReport[]>([]);
 
   /* ======================
-     FETCH FUNCTIONS
+     STATIONERY
   ====================== */
-const handleAddStationeryItem = async (
-  item: Omit<StationeryItem, 'id'>
-) => {
-  if (item.availableStock > item.totalStock) {
-    throw new Error('Available stock cannot exceed total stock');
-  }
 
-  const { error } = await supabase
-    .from('stationery_items')
-    .insert({
-      id: crypto.randomUUID(),
-      name: item.name,
-      category: item.category,
-      total_stock: item.totalStock,
-      available_stock: item.availableStock,
-      unit: item.unit,
-    });
+  const handleAddStationeryItem = async (
+    item: Omit<StationeryItem, 'id'>
+  ) => {
+    if (item.availableStock > item.totalStock) {
+      throw new Error('Available stock cannot exceed total stock');
+    }
 
-  if (error) throw error;
+    const { error } = await supabase
+      .from('stationery_items')
+      .insert({
+        id: crypto.randomUUID(),
+        name: item.name,
+        category: item.category,
+        total_stock: item.totalStock,
+        available_stock: item.availableStock,
+        unit: item.unit,
 
-  await fetchStationery();
-};
+        // OPTIONAL
+        brand: item.brand ?? null,
+        unit_price: item.unitPrice ?? null,
+      });
 
-const handleDeleteStationeryItem = async (itemId: string) => {
-  const confirm = window.confirm(
-    'Are you sure you want to delete this item? This action cannot be undone.'
-  );
+    if (error) throw error;
 
-  if (!confirm) return;
+    await fetchStationery();
+  };
 
-  const { error } = await supabase
-    .from('stationery_items')
-    .delete()
-    .eq('id', itemId);
-
-  if (error) {
-    // Biasanya error karena FK: item sudah dipakai di retrieval_orders / missing_reports
-    alert(
-      error.message.includes('foreign key')
-        ? 'Cannot delete this item because it is already used in orders or reports.'
-        : `Failed to delete item: ${error.message}`
+  const handleDeleteStationeryItem = async (itemId: string) => {
+    const confirm = window.confirm(
+      'Are you sure you want to delete this item? This action cannot be undone.'
     );
-    return;
-  }
+    if (!confirm) return;
 
-  await fetchStationery();
-};
+    const { error } = await supabase
+      .from('stationery_items')
+      .delete()
+      .eq('id', itemId);
 
+    if (error) {
+      alert(
+        error.message.includes('foreign key')
+          ? 'Cannot delete this item because it is already used in orders or reports.'
+          : `Failed to delete item: ${error.message}`
+      );
+      return;
+    }
 
+    await fetchStationery();
+  };
 
   const fetchStationery = async () => {
     const { data, error } = await supabase
       .from('stationery_items')
-      .select('id, name, category, total_stock, available_stock, unit')
+      .select(`
+        id,
+        name,
+        category,
+        total_stock,
+        available_stock,
+        unit,
+        brand,
+        unit_price
+      `)
       .order('name');
 
     if (error) throw error;
@@ -125,10 +141,18 @@ const handleDeleteStationeryItem = async (itemId: string) => {
       totalStock: item.total_stock,
       availableStock: item.available_stock,
       unit: item.unit,
+
+      // OPTIONAL
+      brand: item.brand,
+      unitPrice: item.unit_price,
     }));
 
     setStationeryItems(items);
   };
+
+  /* ======================
+     ORDERS
+  ====================== */
 
   const fetchOrders = async () => {
     const { data, error } = await supabase
@@ -152,6 +176,10 @@ const handleDeleteStationeryItem = async (itemId: string) => {
 
     setRetrievalsOrders(orders);
   };
+
+  /* ======================
+     MISSING REPORTS
+  ====================== */
 
   const fetchMissingReports = async () => {
     const { data, error } = await supabase
@@ -198,13 +226,8 @@ const handleDeleteStationeryItem = async (itemId: string) => {
      ACTION HANDLERS
   ====================== */
 
-  const handleLogin = (user: User) => {
-    setUser(user);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  const handleLogin = (user: User) => setUser(user);
+  const handleLogout = () => setUser(null);
 
   const handleAddRetrievalOrder = async (
     order: Omit<RetrievalOrder, 'id' | 'date' | 'status'>
@@ -219,7 +242,6 @@ const handleDeleteStationeryItem = async (itemId: string) => {
         item_name: order.itemName,
         quantity: order.quantity,
         notes: order.notes,
-        // date & status pakai DEFAULT
       });
 
     if (error) throw error;

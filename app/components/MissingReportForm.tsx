@@ -103,7 +103,7 @@ export default function MissingReportForm({
             <SelectTrigger id="missing-item" className="bg-white">
               <SelectValue className="bg-white" placeholder="Choose a stationery item" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
               {stationeryItems.map((item) => (
                 <SelectItem key={item.id} value={item.id}>
                   {item.name}
